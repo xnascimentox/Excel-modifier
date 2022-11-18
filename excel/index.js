@@ -1,13 +1,12 @@
-const { faker } = require('@faker-js/faker');
+const { faker, Faker } = require('@faker-js/faker');
 const fs = require('fs');
 const Papa = require("papaparse");
-
 const reader = require('xlsx')
 
 faker.locale = 'pt_BR';
   
 // Reading our test file
-const file = reader.readFile('./exemplo.xlsx')
+const file = reader.readFile('./contatos3.xlsx')
   
 let data = []
   
@@ -23,13 +22,20 @@ for(let i = 0; i < sheets.length; i++)
 }
 
 const fakerData = data.map((item) => {
+    const firstName = faker.name.firstName()
+    const lastName = faker.name.lastName()
+    const fullName = `${firstName.toLowerCase()}${lastName.toLowerCase()}`
+    const number = faker.finance.account(10)
+    const code = faker.finance.account(10)
+    
     return {
         ...item,
-        Nome: faker.name.firstName(), 
-        Sobrenome: faker.name.lastName(),
-        'E-mail': faker.internet.email(),
+        Nome:`${firstName}`.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, ""),
+        Sobrenome:`${lastName}`.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, ""),
+        'E-mail':`${fullName}`+`${number}`+'@example.com',
+        'URL Linkedin':'http://www.linkedin.com/in/'+`${fullName}` + `${code}`
     }
-} )
+    } )
 
 const items = {
     users: fakerData
@@ -41,9 +47,8 @@ const items = {
    } )
    console.log(csv);
 
-   fs.writeFile('Contatos-teste.csv', csv, (err) => {    
+   fs.writeFile('testnovo.csv', csv, (err) => {    
     if (err) throw err;  
-    console.log('O arquivo foi criado!');
 });
 
     //fs.writeFileSync('db.json', JSON.stringify(items), (err) => {
